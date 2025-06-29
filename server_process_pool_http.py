@@ -1,11 +1,10 @@
 import socket
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 from http import HttpServer
 
-HOST = '0.0.0.0'
-PORT = 8805
-
 server = HttpServer()
+HOST = '0.0.0.0'
+PORT = 8806
 
 def handle_client(conn, addr):
     try:
@@ -19,12 +18,11 @@ def handle_client(conn, addr):
         conn.close()
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((HOST, PORT))
     s.listen(100)
-    print(f"ThreadPool HTTP server running on port {PORT}")
+    print(f"ProcessPool HTTP server running on port {PORT}")
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ProcessPoolExecutor(max_workers=4) as executor:
         while True:
             conn, addr = s.accept()
             executor.submit(handle_client, conn, addr)
